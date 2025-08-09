@@ -76,11 +76,11 @@ cd NEW-PROJECT-NAME
 1. **package.json** - Update these 3 places:
    - Line 2: `"name": "NEW-PROJECT-NAME"`
    - Line 8: `"build:prod": "ng build --configuration production --base-href=\"/NEW-PROJECT-NAME/\""`
-   - Line 11: `"deploy": "ng build --configuration production --base-href=\"/NEW-PROJECT-NAME/\" && npx angular-cli-ghpages --dir=dist/NEW-PROJECT-NAME"`
+   - Line 11: `"deploy": "ng build --configuration production --base-href=\"/NEW-PROJECT-NAME/\" && npx angular-cli-ghpages --dir=dist/NEW-PROJECT-NAME/browser"`
 
 2. **angular.json** - Line ~13: Update `"outputPath": "dist/NEW-PROJECT-NAME"`
 
-3. **.github/workflows/deploy.yml** - Line 27: Update `publish_dir: ./dist/NEW-PROJECT-NAME`
+3. **.github/workflows/deploy.yml** - Line 34: Update `publish_dir: ./dist/NEW-PROJECT-NAME/browser`
 
 **Step 3: Change Git Remote**
 ```bash
@@ -119,10 +119,18 @@ git push -u origin main
 ❌ Testing on GitHub before testing locally  
 
 ### If Something Breaks:
-1. Check GitHub Actions logs for build errors
-2. Verify base href matches repo name exactly
-3. Ensure all folder names are consistent across config files
-4. Test `npm run build:prod` locally first
+1. **404 on GitHub Pages**: Most common issue! 
+   - Repository must be **public** (private repos need GitHub Pro)
+   - Check deploy paths use `/browser` subfolder: `dist/PROJECT-NAME/browser`
+   - Wait 5-10 minutes after deployment for GitHub Pages to update
+
+2. Check GitHub Actions logs for build errors
+3. Verify base href matches repo name exactly  
+4. Ensure all folder names are consistent across config files
+5. Test `npm run build:prod` locally first
+
+### IMPORTANT: Angular 17+ Build Structure
+Angular 17+ builds to `dist/project-name/browser/` not `dist/project-name/`. This is why we use `/browser` in all deploy paths.
 
 ## Project Structure
 
