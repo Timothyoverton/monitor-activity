@@ -36,9 +36,6 @@ To use this as a template for a new project:
    git commit -m "Initial commit"
    git push -u origin main
    ```
-   - Go to your GitHub repo → Settings → Pages
-   - Source: "Deploy from a branch"
-   - Branch: "gh-pages" / "(root)"
 
 ## Available Scripts
 
