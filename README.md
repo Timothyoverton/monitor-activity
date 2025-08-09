@@ -62,15 +62,67 @@ The project is configured for automatic deployment to GitHub Pages:
 - `angular.json` - Angular CLI configuration
 - `src/app/app.html` - Main component template (currently shows "Can you see me?")
 
-## Important Notes for Claude Code
+## CRITICAL INSTRUCTIONS FOR CLAUDE CODE
 
-When creating new projects from this stub:
+### When Creating New Projects from This Stub - Follow These Steps EXACTLY:
 
-1. **Always update the base href** in `package.json` scripts to match the new repo name
-2. **The GitHub Pages URL** will be: `https://timothyoverton.github.io/your-repo-name/`
-3. **GitHub Actions** automatically deploys on push to main branch
-4. **No manual gh-pages setup needed** - the workflow handles everything
-5. **Test locally first** with `npm start` before pushing
+**Step 1: Clone and Setup**
+```bash
+git clone https://github.com/Timothyoverton/angular-web-stub.git NEW-PROJECT-NAME
+cd NEW-PROJECT-NAME
+```
+
+**Step 2: Update ALL Project References (CRITICAL!)**
+1. **package.json** - Update these 3 places:
+   - Line 2: `"name": "NEW-PROJECT-NAME"`
+   - Line 8: `"build:prod": "ng build --configuration production --base-href=\"/NEW-PROJECT-NAME/\""`
+   - Line 11: `"deploy": "ng build --configuration production --base-href=\"/NEW-PROJECT-NAME/\" && npx angular-cli-ghpages --dir=dist/NEW-PROJECT-NAME"`
+
+2. **angular.json** - Line ~13: Update `"outputPath": "dist/NEW-PROJECT-NAME"`
+
+3. **.github/workflows/deploy.yml** - Line 27: Update `publish_dir: ./dist/NEW-PROJECT-NAME`
+
+**Step 3: Change Git Remote**
+```bash
+git remote remove origin
+git remote add origin https://github.com/Timothyoverton/NEW-PROJECT-NAME.git
+```
+
+**Step 4: Test and Deploy**
+```bash
+npm install
+npm start  # Test locally first!
+npm run build:prod  # Test build works
+git add .
+git commit -m "Initial setup from angular-web-stub"
+git push -u origin main
+```
+
+### GitHub Pages Setup (User must do this):
+1. Go to GitHub repo → Settings → Pages
+2. Source: "Deploy from a branch"
+3. Branch: "gh-pages" / "(root)"
+
+### Key Files That Control Deployment:
+- **package.json** scripts: Controls build paths and base href
+- **.github/workflows/deploy.yml**: Auto-deployment on push to main
+- **angular.json**: Controls where Angular builds output files
+
+### The Magic URLs:
+- **Local dev**: http://localhost:4200/
+- **GitHub Pages**: https://timothyoverton.github.io/NEW-PROJECT-NAME/
+
+### Common Mistakes to Avoid:
+❌ Forgetting to update base href → 404 errors on GitHub Pages  
+❌ Mismatched folder names in package.json vs angular.json  
+❌ Not updating publish_dir in deploy.yml  
+❌ Testing on GitHub before testing locally  
+
+### If Something Breaks:
+1. Check GitHub Actions logs for build errors
+2. Verify base href matches repo name exactly
+3. Ensure all folder names are consistent across config files
+4. Test `npm run build:prod` locally first
 
 ## Project Structure
 
