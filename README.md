@@ -64,11 +64,15 @@ The project is configured for automatic deployment to GitHub Pages:
 
 ## CRITICAL INSTRUCTIONS FOR CLAUDE CODE
 
-### BEFORE YOU START: Check if User Already Has the Repo
-- Ask: "Should I create a new repo for this project or use an existing one?"
-- If existing repo: Skip clone step, just git pull and work in existing directory
+### CLAUDE CODE COMPLETE AUTOMATION WORKFLOW:
 
-### When Creating New Projects from This Stub - Follow These Steps EXACTLY:
+**Ask user only these 2 questions:**
+1. "What should the new project be called?" (e.g. "my-awesome-game")
+2. "Is the GitHub repository public?" (required for free GitHub Pages)
+
+**Then Claude Code does EVERYTHING automatically:**
+
+### COMPLETE AUTOMATED SETUP (Copy this exact workflow):
 
 **Step 1: Clone and Setup**
 ```bash
@@ -92,30 +96,47 @@ git remote remove origin
 git remote add origin https://github.com/Timothyoverton/NEW-PROJECT-NAME.git
 ```
 
-**Step 4: Test and Deploy**
+**Step 4: Install Dependencies & Test Build**
 ```bash
 npm install
-npm start  # Test locally first!
-npm run build:prod  # Test build works
-git add .
-git commit -m "Initial setup from angular-web-stub"
-git push -u origin main
-npm run deploy  # Deploy to GitHub Pages immediately
+npm run build:prod  # Verify build works before deploying
 ```
 
-**Step 5: Validation (CRITICAL!)**
+**Step 5: Commit and Push to GitHub**  
 ```bash
-# Verify these URLs work:
-echo "Local: http://localhost:4200/"
-echo "GitHub Pages: https://timothyoverton.github.io/NEW-PROJECT-NAME/"
-# Wait 5-10 minutes for GitHub Pages, then test the live URL
+git add .
+git commit -m "Initial setup from angular-web-stub
+
+- Project renamed to NEW-PROJECT-NAME
+- Configured for GitHub Pages deployment  
+- Ready for immediate use
+
+🤖 Generated with Claude Code"
+git push -u origin main
 ```
 
-### GitHub Pages Setup (User must do this):
-1. Go to GitHub repo → Settings → Pages
-2. Source: "Deploy from a branch"
-3. Branch: "gh-pages" / "(root)"
-4. Repository must be **PUBLIC** (private repos need GitHub Pro)
+**Step 6: Deploy to GitHub Pages**
+```bash
+npm run deploy
+```
+
+**Step 7: Enable GitHub Pages (AUTOMATED)**
+```bash
+gh api -X PUT /repos/Timothyoverton/NEW-PROJECT-NAME/pages \
+  -f source.branch=gh-pages -f source.path=/
+```
+
+**Step 8: Verify Deployment**
+```bash
+echo "✅ Project setup complete!"
+echo "🌐 Local dev: http://localhost:4200/"  
+echo "🚀 GitHub Pages: https://timothyoverton.github.io/NEW-PROJECT-NAME/"
+echo "⏰ GitHub Pages may take 5-10 minutes to become active"
+```
+
+### USER DOES ABSOLUTELY NOTHING!
+Claude Code handles: cloning, renaming, configuring, building, deploying, and enabling GitHub Pages.
+**Only requirement:** Repository must be PUBLIC for free GitHub Pages.
 
 ### WHAT TO EXPECT:
 - ✅ Local dev server starts on http://localhost:4200/
@@ -153,12 +174,21 @@ echo "GitHub Pages: https://timothyoverton.github.io/NEW-PROJECT-NAME/"
 ### IMPORTANT: Angular 17+ Build Structure
 Angular 17+ builds to `dist/project-name/browser/` not `dist/project-name/`. This is why we use `/browser` in all deploy paths.
 
-### CLAUDE CODE AUTOMATION TIPS:
+### WHAT CLAUDE CODE AUTOMATES (Everything!):
+✅ **Project Setup**: Clone, rename, configure all files  
+✅ **Git Operations**: Remove old remote, add new remote, commit, push  
+✅ **Dependencies**: Install npm packages automatically  
+✅ **Building**: Test production build before deployment  
+✅ **Deployment**: Deploy to GitHub Pages via npm script  
+✅ **GitHub Pages**: Enable Pages hosting via GitHub CLI  
+✅ **Validation**: Verify URLs and provide status updates  
+
+### CLAUDE CODE TOOL USAGE:
 1. **Use MultiEdit tool** for updating multiple project references at once
-2. **Always use Bash tool** for git commands and npm scripts - don't suggest manual steps
+2. **Always use Bash tool** for git commands and npm scripts - don't suggest manual steps  
 3. **Test the full flow** - clone, update, build, deploy in one session
-4. **Glob/Grep first** - check existing file structure before making assumptions
-5. **Create TodoWrite list** for complex setups to track progress
+4. **Use GitHub CLI** (gh command) for Pages setup - it's pre-approved
+5. **Create TodoWrite list** to track the 8-step automated process
 
 ### FILE REPLACEMENT CHECKLIST:
 When using MultiEdit or Edit tools, replace these exact strings:
