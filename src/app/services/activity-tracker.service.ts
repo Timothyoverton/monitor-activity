@@ -121,10 +121,10 @@ export class ActivityTrackerService {
     }
 
     this.inactivityTimeout = setTimeout(() => {
-      if (Date.now() - this.lastActivityTime > 30000) {
+      if (Date.now() - this.lastActivityTime > 3000) {
         this.setUserInactive(userName);
       }
-    }, 30000);
+    }, 3000);
   }
 
   private startTimer(): void {
