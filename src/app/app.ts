@@ -21,6 +21,7 @@ export class App implements OnInit, OnDestroy {
   protected showNameInput = signal<boolean>(true);
   protected inputName = signal<string>('');
   protected isPaused = signal<boolean>(false);
+  protected isInactive = signal<boolean>(false);
 
   private destroy$ = new Subject<void>();
 
@@ -42,11 +43,7 @@ export class App implements OnInit, OnDestroy {
       .subscribe(isVisible => {
         this.isVisible.set(isVisible);
         if (this.userName()) {
-          if (isVisible) {
-            this.activityTracker.setUserActive(this.userName()!);
-          } else {
-            this.activityTracker.setUserInactive(this.userName()!);
-          }
+          this.activityTracker.setPageVisibility(isVisible, this.userName()!);
         }
       });
 
@@ -54,6 +51,7 @@ export class App implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe(logs => {
         this.activityLog.set(logs);
+        this.updateInactiveStatus();
       });
 
     this.activityTracker.getActiveSeconds()
@@ -67,6 +65,16 @@ export class App implements OnInit, OnDestroy {
       .subscribe(isPaused => {
         this.isPaused.set(isPaused);
       });
+  }
+
+  private updateInactiveStatus(): void {
+    if (this.activityLog().length === 0) {
+      this.isInactive.set(false);
+      return;
+    }
+
+    const lastLog = this.activityLog()[this.activityLog().length - 1];
+    this.isInactive.set(lastLog.type === 'inactive');
   }
 
   setUserName(): void {

@@ -22,9 +22,9 @@
       </div>
 
       <div class="status-panel">
-        <div class="status-indicator" [class.active]="isVisible() && !isPaused()" [class.inactive]="!isVisible() || isPaused()">
-          <span *ngIf="isVisible() && !isPaused()" class="status-text">📍 You are ACTIVE on the page</span>
-          <span *ngIf="!isVisible() && !isPaused()" class="status-text">❌ You are AWAY from the page</span>
+        <div class="status-indicator" [class.active]="!isInactive() && !isPaused()" [class.inactive]="isInactive() || isPaused()">
+          <span *ngIf="!isInactive() && !isPaused()" class="status-text">📍 You are ACTIVE on the page</span>
+          <span *ngIf="isInactive() && !isPaused()" class="status-text">❌ You are AWAY from the page</span>
           <span *ngIf="isPaused()" class="status-text">⏸️ Timer is PAUSED</span>
         </div>
       </div>

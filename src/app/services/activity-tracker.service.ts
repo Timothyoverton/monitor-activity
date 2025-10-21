@@ -13,6 +13,7 @@ export class ActivityTrackerService {
   private activityLog$ = new BehaviorSubject<ActivityLog[]>([]);
   private activeSeconds$ = new BehaviorSubject<number>(0);
   private isPaused$ = new BehaviorSubject<boolean>(false);
+  private isPageVisible$ = new BehaviorSubject<boolean>(true);
   private activeStartTime: number | null = null;
   private inactiveStartTime: number | null = null;
   private timerInterval: any;
@@ -46,8 +47,32 @@ export class ActivityTrackerService {
     this.setupInactivityDetection(userName);
   }
 
+  setPageVisibility(isVisible: boolean, userName: string): void {
+    this.isPageVisible$.next(isVisible);
+
+    if (isVisible) {
+      // Page became visible, resume counting
+      if (this.inactiveStartTime !== null && !this.isManuallyPaused) {
+        const inactiveDuration = (Date.now() - this.inactiveStartTime) / 1000;
+        this.addLog(`${userName} is active again (was inactive for ${Math.round(inactiveDuration)}s)`, 'active');
+        this.inactiveStartTime = null;
+        this.setUserActive(userName);
+      }
+    } else {
+      // Page became hidden, pause counting
+      if (this.activeStartTime !== null && !this.isManuallyPaused) {
+        const activeDuration = (Date.now() - this.activeStartTime) / 1000;
+        this.accumulatedSeconds += Math.floor(activeDuration);
+        this.activeSeconds$.next(this.accumulatedSeconds);
+        this.activeStartTime = null;
+        this.addLog(`${userName} moved away from page`, 'inactive');
+        this.inactiveStartTime = Date.now();
+      }
+    }
+  }
+
   setUserActive(userName: string): void {
-    if (this.isManuallyPaused) {
+    if (this.isManuallyPaused || !this.isPageVisible$.getValue()) {
       return;
     }
 
@@ -62,7 +87,6 @@ export class ActivityTrackerService {
     }
 
     this.lastActivityTime = Date.now();
-    this.resetInactivityTimer(userName);
   }
 
   setUserInactive(userName: string): void {
@@ -110,21 +134,21 @@ export class ActivityTrackerService {
   }
 
   private setupInactivityDetection(userName: string): void {
-    document.addEventListener('mousemove', () => this.setUserActive(userName));
-    document.addEventListener('keypress', () => this.setUserActive(userName));
-    document.addEventListener('click', () => this.setUserActive(userName));
-  }
-
-  private resetInactivityTimer(userName: string): void {
-    if (this.inactivityTimeout) {
-      clearTimeout(this.inactivityTimeout);
-    }
-
-    this.inactivityTimeout = setTimeout(() => {
-      if (Date.now() - this.lastActivityTime > 3000) {
-        this.setUserInactive(userName);
+    document.addEventListener('mousemove', () => {
+      if (this.isPageVisible$.getValue() && !this.isManuallyPaused) {
+        this.setUserActive(userName);
       }
-    }, 3000);
+    });
+    document.addEventListener('keypress', () => {
+      if (this.isPageVisible$.getValue() && !this.isManuallyPaused) {
+        this.setUserActive(userName);
+      }
+    });
+    document.addEventListener('click', () => {
+      if (this.isPageVisible$.getValue() && !this.isManuallyPaused) {
+        this.setUserActive(userName);
+      }
+    });
   }
 
   private startTimer(): void {
