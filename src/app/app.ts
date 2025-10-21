@@ -31,13 +31,6 @@ export class App implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    const name = prompt('Please enter your name:');
-    if (name && name.trim()) {
-      this.userName.set(name.trim());
-      this.showNameInput.set(false);
-      this.startTracking();
-    }
-
     this.visibilityService.visibility$
       .pipe(takeUntil(this.destroy$))
       .subscribe(isVisible => {
