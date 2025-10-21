@@ -6,7 +6,7 @@
   },
   "newProjectRoot": "projects",
   "projects": {
-    "angular-web-stub": {
+    "monitor-activity": {
       "projectType": "application",
       "schematics": {},
       "root": "",
@@ -59,10 +59,10 @@
           "builder": "@angular/build:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "angular-web-stub:build:production"
+              "buildTarget": "monitor-activity:build:production"
             },
             "development": {
-              "buildTarget": "angular-web-stub:build:development"
+              "buildTarget": "monitor-activity:build:development"
             }
           },
           "defaultConfiguration": "development"

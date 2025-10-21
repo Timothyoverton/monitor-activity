@@ -1,46 +1,52 @@
-<style>
-  :host {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    box-sizing: border-box;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-  }
-
-  main {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  }
-
-  .container {
-    text-align: center;
-    padding: 2rem;
-    background: white;
-    border-radius: 10px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-  }
-
-  h1 {
-    font-size: 3rem;
-    color: #333;
-    margin: 0;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
-  }
-
-  p {
-    font-size: 1.2rem;
-    color: #666;
-    margin-top: 1rem;
-  }
-</style>
-
 <main>
   <div class="container">
-    <h1>Can you see me?</h1>
-    <p>{{ title() }} is working! 🚀</p>
+    <h1>{{ title() }}</h1>
+    
+    <div *ngIf="showNameInput()" class="name-input-section">
+      <p>Enter your name to get started:</p>
+      <div class="input-group">
+        <input 
+          type="text" 
+          [(ngModel)]="inputName" 
+          placeholder="Your name"
+          (keyup.enter)="setUserName()"
+          autofocus
+        />
+        <button (click)="setUserName()">Start</button>
+      </div>
+    </div>
+
+    <div *ngIf="!showNameInput()" class="monitoring-section">
+      <div class="user-info">
+        <p class="welcome-text">Welcome, <strong>{{ userName() }}</strong>!</p>
+      </div>
+
+      <div class="status-panel">
+        <div class="status-indicator" [class.active]="isVisible()" [class.inactive]="!isVisible()">
+          <span *ngIf="isVisible()" class="status-text">📍 You are ACTIVE on the page</span>
+          <span *ngIf="!isVisible()" class="status-text">❌ You are AWAY from the page</span>
+        </div>
+      </div>
+
+      <div class="timer-section">
+        <div class="timer-display">
+          <p class="timer-label">Total Active Time:</p>
+          <p class="timer-value">{{ getFormattedTime(activeSeconds()) }}</p>
+        </div>
+      </div>
+
+      <div class="activity-log-section">
+        <h2>Activity Log</h2>
+        <div class="activity-log">
+          <div *ngIf="activityLog().length === 0" class="no-activities">
+            No activity yet...
+          </div>
+          <div *ngFor="let log of activityLog()" class="log-entry" [class]="log.type">
+            <span class="log-time">{{ formatTime(log.timestamp) }}</span>
+            <span class="log-message">{{ log.message }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </main>
-
-
