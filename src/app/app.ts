@@ -20,6 +20,7 @@ export class App implements OnInit, OnDestroy {
   protected isVisible = signal<boolean>(true);
   protected showNameInput = signal<boolean>(true);
   protected inputName = signal<string>('');
+  protected isPaused = signal<boolean>(false);
 
   private destroy$ = new Subject<void>();
 
@@ -60,6 +61,12 @@ export class App implements OnInit, OnDestroy {
       .subscribe(seconds => {
         this.activeSeconds.set(seconds);
       });
+
+    this.activityTracker.getIsPaused()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(isPaused => {
+        this.isPaused.set(isPaused);
+      });
   }
 
   setUserName(): void {
@@ -69,6 +76,14 @@ export class App implements OnInit, OnDestroy {
       this.showNameInput.set(false);
       this.startTracking();
     }
+  }
+
+  pauseTimer(): void {
+    this.activityTracker.pauseTracking(this.userName()!);
+  }
+
+  resumeTimer(): void {
+    this.activityTracker.resumeTracking(this.userName()!);
   }
 
   private startTracking(): void {

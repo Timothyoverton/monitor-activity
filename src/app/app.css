@@ -257,3 +257,31 @@ p {
     width: 100%;
   }
 }
+
+.button-group {
+  display: flex;
+  gap: 1rem;
+  margin: 1.5rem 0;
+  justify-content: center;
+}
+
+.pause-btn,
+.resume-btn {
+  padding: 0.75rem 1.5rem;
+  background-color: #667eea;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  font-weight: bold;
+}
+
+.pause-btn:hover {
+  background-color: #ff9800;
+}
+
+.resume-btn:hover {
+  background-color: #28a745;
+}
