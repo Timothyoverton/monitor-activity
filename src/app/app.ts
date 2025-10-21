@@ -1,7 +1,6 @@
 import { Component, OnInit, OnDestroy, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { VisibilityService } from './services/visibility.service';
 import { ActivityTrackerService, ActivityLog } from './services/activity-tracker.service';
 import { Subject, takeUntil } from 'rxjs';
 
@@ -17,7 +16,6 @@ export class App implements OnInit, OnDestroy {
   protected userName = signal<string | null>(null);
   protected activityLog = signal<ActivityLog[]>([]);
   protected activeSeconds = signal<number>(0);
-  protected isVisible = signal<boolean>(true);
   protected showNameInput = signal<boolean>(true);
   protected inputName = signal<string>('');
   protected isPaused = signal<boolean>(false);
@@ -26,20 +24,10 @@ export class App implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
 
   constructor(
-    private visibilityService: VisibilityService,
     private activityTracker: ActivityTrackerService
   ) {}
 
   ngOnInit(): void {
-    this.visibilityService.visibility$
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(isVisible => {
-        this.isVisible.set(isVisible);
-        if (this.userName()) {
-          this.activityTracker.setPageVisibility(isVisible, this.userName()!);
-        }
-      });
-
     this.activityTracker.getActivityLog()
       .pipe(takeUntil(this.destroy$))
       .subscribe(logs => {

@@ -13,7 +13,6 @@ export class ActivityTrackerService {
   private activityLog$ = new BehaviorSubject<ActivityLog[]>([]);
   private activeSeconds$ = new BehaviorSubject<number>(0);
   private isPaused$ = new BehaviorSubject<boolean>(false);
-  private isPageVisible$ = new BehaviorSubject<boolean>(true);
   private activeStartTime: number | null = null;
   private inactiveStartTime: number | null = null;
   private timerInterval: any;
@@ -21,6 +20,7 @@ export class ActivityTrackerService {
   private lastActivityTime: number = Date.now();
   private inactivityTimeout: any;
   private isManuallyPaused = false;
+  private isCurrentlyInactive = false;
 
   getActivityLog(): Observable<ActivityLog[]> {
     return this.activityLog$.asObservable();
@@ -42,46 +42,22 @@ export class ActivityTrackerService {
     this.addLog(`User "${userName}" started session`, 'active');
     this.isManuallyPaused = false;
     this.isPaused$.next(false);
+    this.isCurrentlyInactive = false;
     this.setUserActive(userName);
     this.startTimer();
     this.setupInactivityDetection(userName);
-  }
-
-  setPageVisibility(isVisible: boolean, userName: string): void {
-    this.isPageVisible$.next(isVisible);
-
-    if (isVisible) {
-      // Page became visible, resume counting
-      if (this.inactiveStartTime !== null && !this.isManuallyPaused) {
-        const inactiveDuration = (Date.now() - this.inactiveStartTime) / 1000;
-        this.addLog(`${userName} is active again (was inactive for ${Math.round(inactiveDuration)}s)`, 'active');
-        this.inactiveStartTime = null;
-        this.setUserActive(userName);
-      }
-      this.resetInactivityTimer(userName);
-    } else {
-      // Page became hidden, pause counting after 3 seconds
-      if (this.activeStartTime !== null && !this.isManuallyPaused) {
-        const activeDuration = (Date.now() - this.activeStartTime) / 1000;
-        this.accumulatedSeconds += Math.floor(activeDuration);
-        this.activeSeconds$.next(this.accumulatedSeconds);
-        this.activeStartTime = null;
-        this.addLog(`${userName} moved away from page`, 'inactive');
-        this.inactiveStartTime = Date.now();
-      }
-      this.resetInactivityTimer(userName);
-    }
+    this.startInactivityCheck(userName);
   }
 
   setUserActive(userName: string): void {
-    if (this.isManuallyPaused || !this.isPageVisible$.getValue()) {
+    if (this.isManuallyPaused) {
       return;
     }
 
-    if (this.inactiveStartTime !== null) {
-      const inactiveDuration = (Date.now() - this.inactiveStartTime) / 1000;
+    if (this.isCurrentlyInactive) {
+      const inactiveDuration = (Date.now() - this.inactiveStartTime ! || 0) / 1000;
       this.addLog(`${userName} is active again (was inactive for ${Math.round(inactiveDuration)}s)`, 'active');
-      this.inactiveStartTime = null;
+      this.isCurrentlyInactive = false;
     }
 
     if (this.activeStartTime === null) {
@@ -89,11 +65,10 @@ export class ActivityTrackerService {
     }
 
     this.lastActivityTime = Date.now();
-    this.resetInactivityTimer(userName);
   }
 
   setUserInactive(userName: string): void {
-    if (this.isManuallyPaused) {
+    if (this.isManuallyPaused || this.isCurrentlyInactive) {
       return;
     }
 
@@ -106,6 +81,7 @@ export class ActivityTrackerService {
 
     this.addLog(`${userName} moved away from page`, 'inactive');
     this.inactiveStartTime = Date.now();
+    this.isCurrentlyInactive = true;
   }
 
   pauseTracking(userName: string): void {
@@ -118,10 +94,6 @@ export class ActivityTrackerService {
       this.accumulatedSeconds += Math.floor(activeDuration);
       this.activeSeconds$.next(this.accumulatedSeconds);
       this.activeStartTime = null;
-    }
-
-    if (this.inactivityTimeout) {
-      clearTimeout(this.inactivityTimeout);
     }
   }
 
@@ -138,34 +110,36 @@ export class ActivityTrackerService {
 
   private setupInactivityDetection(userName: string): void {
     document.addEventListener('mousemove', () => {
-      if (this.isPageVisible$.getValue() && !this.isManuallyPaused) {
+      if (!this.isManuallyPaused) {
         this.setUserActive(userName);
       }
     });
     document.addEventListener('keypress', () => {
-      if (this.isPageVisible$.getValue() && !this.isManuallyPaused) {
+      if (!this.isManuallyPaused) {
         this.setUserActive(userName);
       }
     });
     document.addEventListener('click', () => {
-      if (this.isPageVisible$.getValue() && !this.isManuallyPaused) {
+      if (!this.isManuallyPaused) {
+        this.setUserActive(userName);
+      }
+    });
+    document.addEventListener('mousemove', () => {
+      if (!this.isManuallyPaused) {
         this.setUserActive(userName);
       }
     });
   }
 
-  private resetInactivityTimer(userName: string): void {
-    if (this.inactivityTimeout) {
-      clearTimeout(this.inactivityTimeout);
-    }
-
-    this.inactivityTimeout = setTimeout(() => {
-      if (!this.isPageVisible$.getValue() && !this.isManuallyPaused && this.activeStartTime !== null) {
-        if (Date.now() - this.lastActivityTime > 3000) {
+  private startInactivityCheck(userName: string): void {
+    setInterval(() => {
+      if (!this.isManuallyPaused && !this.isCurrentlyInactive) {
+        const timeSinceLastActivity = Date.now() - this.lastActivityTime;
+        if (timeSinceLastActivity > 3000) {
           this.setUserInactive(userName);
         }
       }
-    }, 3000);
+    }, 1000);
   }
 
   private startTimer(): void {
@@ -181,9 +155,6 @@ export class ActivityTrackerService {
   stopTracking(): void {
     if (this.timerInterval) {
       clearInterval(this.timerInterval);
-    }
-    if (this.inactivityTimeout) {
-      clearTimeout(this.inactivityTimeout);
     }
   }
 
@@ -205,5 +176,6 @@ export class ActivityTrackerService {
     this.inactiveStartTime = null;
     this.isManuallyPaused = false;
     this.isPaused$.next(false);
+    this.isCurrentlyInactive = false;
   }
 }
