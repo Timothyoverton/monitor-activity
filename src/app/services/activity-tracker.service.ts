@@ -58,8 +58,9 @@ export class ActivityTrackerService {
         this.inactiveStartTime = null;
         this.setUserActive(userName);
       }
+      this.resetInactivityTimer(userName);
     } else {
-      // Page became hidden, pause counting
+      // Page became hidden, pause counting after 3 seconds
       if (this.activeStartTime !== null && !this.isManuallyPaused) {
         const activeDuration = (Date.now() - this.activeStartTime) / 1000;
         this.accumulatedSeconds += Math.floor(activeDuration);
@@ -68,6 +69,7 @@ export class ActivityTrackerService {
         this.addLog(`${userName} moved away from page`, 'inactive');
         this.inactiveStartTime = Date.now();
       }
+      this.resetInactivityTimer(userName);
     }
   }
 
@@ -87,6 +89,7 @@ export class ActivityTrackerService {
     }
 
     this.lastActivityTime = Date.now();
+    this.resetInactivityTimer(userName);
   }
 
   setUserInactive(userName: string): void {
@@ -149,6 +152,20 @@ export class ActivityTrackerService {
         this.setUserActive(userName);
       }
     });
+  }
+
+  private resetInactivityTimer(userName: string): void {
+    if (this.inactivityTimeout) {
+      clearTimeout(this.inactivityTimeout);
+    }
+
+    this.inactivityTimeout = setTimeout(() => {
+      if (!this.isPageVisible$.getValue() && !this.isManuallyPaused && this.activeStartTime !== null) {
+        if (Date.now() - this.lastActivityTime > 3000) {
+          this.setUserInactive(userName);
+        }
+      }
+    }, 3000);
   }
 
   private startTimer(): void {
